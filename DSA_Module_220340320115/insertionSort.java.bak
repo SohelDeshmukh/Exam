@@ -1,0 +1,27 @@
+import java.util.*;
+class insertionSort{
+	public static void main(String []args){
+
+		Scanner sc = new Scanner(System.in);
+		int n = sc.nextInt();
+		int a1[] = new int[n];
+		int temp, j;
+		
+		for (int i=0; i<n; i++)
+			a1[i] = sc.nextInt();
+		
+		for (int i=1; i<a1.length; i++){
+			temp = a1[i];
+			j=i;
+			while(j>0 && a1[j-1]>temp){
+				a1[j] = a1[j-1];
+				j--;
+			}
+			a1[j] = temp;
+			for(int a : a1)
+				System.out.print(a+" ");
+			System.out.println(" ");
+		}
+
+	}
+}
