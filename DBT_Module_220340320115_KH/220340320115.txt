@@ -1,0 +1,195 @@
+SECTION I
+
+1.sql> create table DEPT (DEPTNO int(2), DNAME varchar(15), LOC varchar(10));
+Query OK, 0 rows affected, 1 warning (0.09 sec)
+
+mysql> insert into DEPT values
+    -> (10, 'ACCOUNTING', 'NEW YORK'),
+    -> (20, 'RESEARCH', 'DALLAS'),
+    -> (30, 'SALES', 'CHICAGO'),
+    -> (40, 'OPERATIONS', 'BOSTON');
+Query OK, 4 rows affected (0.02 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+
+2.sql> create table EMP (EMPNO int(4), ENAME varchar(10), JOB varchar(9),
+    -> HIREDATE date, SAL float(7,2), COMM float(7,2), DEPTNO int(2));
+Query OK, 0 rows affected, 4 warnings (0.05 sec)
+
+mysql> insert into EMP values
+    -> (7839,'KING','MANAGER','1991-11-17',5000,NULL,10),
+    -> (7698,'BLAKE','CLERK','1981-05-01',2850,NULL,30),
+    -> (7782,'CLARK','MANAGER','1981-06-09',2450,NULL,10),
+    -> (7566,'JONES','CLERK','1981-04-02',2975,NULL,20),
+    -> (7654,'MARTIN','SALESMAN','1981-09-28',1250,1400,30),
+    -> (7499,'ALLEN','SALESMAN','1981-02-20',1600,300,30);
+Query OK, 6 rows affected (0.01 sec)
+Records: 6  Duplicates: 0  Warnings: 0
+
+
+3.sql> select ENAME, SAL from emp
+    -> where SAL between 2500 and 5000;
++-------+---------+
+| ENAME | SAL     |
++-------+---------+
+| KING  | 5000.00 |
+| BLAKE | 2850.00 |
+| JONES | 2975.00 |
++-------+---------+
+
+
+4.sql> select ENAME from emp
+    -> order by ename desc;
++--------+
+| ENAME  |
++--------+
+| MARTIN |
+| KING   |
+| JONES  |
+| CLARK  |
+| BLAKE  |
+| ALLEN  |
++--------+
+
+
+5.sql> select lower(JOB) JOB from emp;
++----------+
+| JOB      |
++----------+
+| manager  |
+| clerk    |
+| manager  |
+| clerk    |
+| salesman |
+| salesman |
++----------+
+
+
+6.sql> select ENAME, LENGTH(ENAME) LENGTH from emp;
++--------+--------+
+| ENAME  | LENGTH |
++--------+--------+
+| KING   |      4 |
+| BLAKE  |      5 |
+| CLARK  |      5 |
+| JONES  |      5 |
+| MARTIN |      6 |
+| ALLEN  |      5 |
++--------+--------+
+
+
+7.sql> select DEPTNO, count(*) from emp
+    -> group by deptno;
++--------+----------+
+| DEPTNO | count(*) |
++--------+----------+
+|     10 |        2 |
+|     30 |        3 |
+|     20 |        1 |
++--------+----------+
+
+
+8.sql> select d.dname DNAME, e.ename ENAME from emp e,dept d
+    -> where e.deptno=d.deptno;
++------------+--------+
+| DNAME      | ENAME  |
++------------+--------+
+| ACCOUNTING | KING   |
+| SALES      | BLAKE  |
+| ACCOUNTING | CLARK  |
+| RESEARCH   | JONES  |
+| SALES      | MARTIN |
+| SALES      | ALLEN  |
++------------+--------+
+
+
+9.sql> select ENAME, position('AR' in ENAME) FIR_OCC from emp;
++--------+---------+
+| ENAME  | FIR_OCC |
++--------+---------+
+| KING   |       0 |
+| BLAKE  |       0 |
+| CLARK  |       3 |
+| JONES  |       0 |
+| MARTIN |       2 |
+| ALLEN  |       0 |
++--------+---------+
+
+
+10.sql> select ENAME, 0.2*SAL HRA from emp;
++--------+---------+
+| ENAME  | HRA     |
++--------+---------+
+| KING   | 1000.00 |
+| BLAKE  |  570.00 |
+| CLARK  |  490.00 |
+| JONES  |  595.00 |
+| MARTIN |  250.00 |
+| ALLEN  |  320.00 |
++--------+---------+
+6 rows in set (0.00 sec)
+
+
+SECTION II
+
+1.sql> create table TEMPP (str1 varchar(10), str2 varchar(10), answer varchar(50));
+
+delimiter $$
+create procedure PROC1 (s1 varchar(10), s2 varchar(10))
+begin
+	if instr(s1,s2) then
+		insert into TEMPP values (s1, s2, 'str1 exists inside str2');
+	elseif instr(s2,s1) then
+		insert into TEMPP values (s1, s2, 'str2 exists inside str1');
+	else
+		insert into TEMPP values (s1, s2, 'neither string exist inside eachother');
+	end if;
+end; $$
+delimiter ;
+
+mysql> call PROC1 ('DAC','CDAC');
+mysql> call PROC1 ('CDAC','DAC');
+mysql> call PROC1 ('CDAC','MUMBAI');
+
+mysql> select * from TEMPP;
++------+--------+---------------------------------------+
+| str1 | str2   | answer                                |
++------+--------+---------------------------------------+
+| DAC  | CDAC   | str2 exists inside str1               |
+| CDAC | DAC    | str1 exists inside str2               |
+| CDAC | MUMBAI | neither string exist inside eachother |
++------+--------+---------------------------------------+
+
+
+2.sql> create table F_TEMPP (triangle varchar(10));
+
+delimiter //
+create function FUNC1(a int, b int, c int)
+returns boolean deterministic
+begin
+	if (a+b)>c or (b+c)>a or (a+c)>b then
+	return true;
+	else
+	return false;
+	end if;
+end; //
+
+delimiter //
+create procedure FUNC1_PROC (a int, b int, c int)
+begin
+	if FUNC1(a, b, c) then
+		insert into F_TEMPP values('valid');
+	else
+		insert into F_TEMPP values('invalid');
+	end if;
+end; //
+delimier ;
+
+mysql> call FUNC1_PROC(2,5,4);
+
+mysql> select * from F_TEMPP;
++----------+
+| triangle |
++----------+
+| valid    |
++----------+
